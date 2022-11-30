@@ -110,7 +110,7 @@ def arvon_paasihteeri(update: Update, context: CallbackContext):
         else:
             paasihteeri = "SIPERIAAN!"
         context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
-    else
+    else:
         sleeps()
 
 def horinaa():
