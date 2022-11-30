@@ -22,8 +22,8 @@ SALAISUUS = os.environ.get('SALAISUUS')
 
 global horinat
 global sleeps
-horinat = {"...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa"}
-unet = {"...zzz...zz...", "..zz...z...", "...zz..z.zz..."}
+horinat = ["...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa"]
+unet = ["...zzz...zz...", "..zz...z...", "...zz..z.zz..."]
 
 # Cooldown related stuff
 COOLDOWN = {"minutes" : 1, "last" : None}
