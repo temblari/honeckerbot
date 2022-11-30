@@ -59,6 +59,92 @@ def initdb():
         database = DBNAME
         )
 
+
+#########
+# SOCIAL CREDITS #
+######################################################################################
+
+
+def kansalaiseksi(update: Update, context: CallbackContext):
+    name = context.message.from_user.username
+    name.strip('@')
+
+    if is_in_db(name):
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text="Olet jo kansalainen")
+    else:
+        cursor.execute("INSERT INTO Stasi (Username, Credits) VALUES (%s, %s)", (name, 0))
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text="Olet nyt kansalainen")
+
+
+def update_credit(name: str, amount: int):
+    credits = cursor.execute("SELECT Credits FROM Stasi WHERE Username = %s", (name))
+    credits = credits + amount
+    cursor.execute("UPDATE Stasi SET Credits = %s WHERE Username = %s", (credits, name))
+
+
+def is_in_db(name: str) -> bool:
+    cursor.execute("SELECT * FROM stasi WHERE username = %s", (name))
+    return cursor.rowcount > 0
+
+
+def ilmianna(update: Update, context: CallbackContext):
+    subject = ""
+    reason = ""
+
+    if len(context.args) < 2:
+        subject = context.message.from_user.username
+        reason = "Usage: /vinkkaa <henkilö> <syy>"
+
+    else:
+        subject = context.args[0].strip('@')
+
+        reason = ' '.join(context.args[1:])
+
+    # check for valid username
+    if subject == "honeckerbot":
+        reason = "Pääsihteeri ei voi tehdä väärin"
+        punishment = -1000
+    elif is_in_db(subject):
+        punishment = random.randint(-1, -100)
+        update_credit(subject, punishment)
+
+        response = f"@{subject}, pääsihteeri on vihainen:\n-{punishment} pistettä: {reason}"
+    else:
+        response = f"Henkilö ei ole kansalainen"
+
+    context.bot.sendMessage(chat_id=update.effective_chat.id, text=response)
+
+
+def kehu(update: Update, context: CallbackContext):
+    if len(context.args) < 2:
+        context.bot.sendMessage(chat_id=update.message.chat.id, text='Usage: /kehu <name> <syy>')
+    else:
+        name = context.args[0].strip('@')
+        reason = ' '.join(context.args[1:])
+
+        price = random.randint(1, 10)
+        update_credit(name, price)
+
+        response = f"@{name}, pääsihteeri on tyytyväinen:\n+{price} pistettä: {reason}"
+
+
+def tilanne(update: Update, context: CallbackContext):
+    response = ""
+    user = context.message.from_user.username
+    user.strip('@')
+
+    credits = cursor.execute("SELECT Credits FROM stasi WHERE username = %s", (user))
+
+    if credits < 0:
+        response = f"{credits} pisteitä, kuolema on sinun kohtalosi"
+    elif credits < 100:
+        response = f"{credits} pisteitä, olet ihan ok kansalainen"
+    elif credits < 100:
+        response = f"{credits} pisteitä, olet hyvä kansalainen"
+
+    context.bot.sendMessage(chat_id=update.effective_chat.id, text=response)
+
+
 #########
 # QUOTE #
 ######################################################################################
