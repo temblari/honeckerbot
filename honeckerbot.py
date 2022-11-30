@@ -23,8 +23,7 @@ SALAISUUS = os.environ.get('SALAISUUS')
 quotes = {} # { str : list[str] }
 
 def dbtest(update: Update, context: CallbackContext):
-    cursor = db.cursor()
-    tuloste = str(cursor.execute("SHOW TABLES"))
+    tuloste = str(cursor.execute("show tables"))
     context.bot.sendMessage(chat_id=update.effective_chat.id, text=tuloste)
 
 def initdb():
@@ -40,15 +39,18 @@ def initdb():
 ######################################################################################
 # TODO: use database
 def save_quote(name : str, quote : str):
-    global quotes
-    if not name in quotes:
-        quotes[name] = [quote]
-    else:
-        quotes[name].append(quote)
-
+    insert_quotes = (
+       "INSERT INTO Quotes (name, quote) "
+       "VALUES (%s, %s)"
+    )
+    # data = (name, quote)
+    cursor.execute(insert_quotes, name, quote)
+    #if not name in quotes:
+    #    quotes[name] = [quote]
+    #else:
+    #    quotes[name].append(quote)
 # TODO: use database
 def get_quote(name : str) -> str:
-    global quotes
     if not name in quotes:
         return f"No quotes exist for {name}"
     else:
