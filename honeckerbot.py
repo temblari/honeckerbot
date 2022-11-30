@@ -21,7 +21,9 @@ DBPASSWORD = os.environ.get('DBPASSWORD')
 SALAISUUS = os.environ.get('SALAISUUS')
 
 global horinat
+global sleeps
 horinat = {"...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa"}
+sleeps = {"...zzz...zz...", "..zz...z...", "...zz..z.zz..."}
 
 # Cooldown related stuff
 COOLDOWN = {"minutes" : 1, "last" : None}
@@ -44,9 +46,6 @@ def check_cooldown() -> bool:
 
     COOLDOWN['last'] = now
     return False
-
-# TODO: Make me a database
-quotes = {} # { str : list[str] }
 
 def dbtest(update: Update, context: CallbackContext):
     tuloste = str(cursor.execute("show tables"))
@@ -111,9 +110,14 @@ def arvon_paasihteeri(update: Update, context: CallbackContext):
         else:
             paasihteeri = "SIPERIAAN!"
         context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
+    else
+        sleeps()
 
 def horinaa():
     return random.choice(horinat)
+
+def sleeps():
+    return random.choice(sleeps)
 
 def main():
     global quotes
