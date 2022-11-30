@@ -1,0 +1,5 @@
+DBPASSWORD=lol
+SALAISUUS=enkerro
+
+export DBPASSWORD
+export SALAISUUS
