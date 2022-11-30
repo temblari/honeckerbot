@@ -4,12 +4,14 @@
 from telegram import Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, Filters, MessageHandler
 
-import os
+import datetime
+import json
 import logging
+import os
+import random
 import re
 import requests
-import json
-import random
+
 import mysql.connector
 
 DBHOST = "localhost"
@@ -18,6 +20,28 @@ DBNAME = "honeckerdb"
 DBPASSWORD = os.environ.get('DBPASSWORD')
 SALAISUUS = os.environ.get('SALAISUUS')
 
+
+# Cooldown related stuff
+COOLDOWN = {"minutes" : 1, "last" : None}
+
+def check_cooldown() -> bool:
+    global COOLDOWN
+    now = datetime.datetime.now()
+    last = COOLDOWN["last"]
+
+    if last == None:
+        COOLDOWN["last"] = now
+        return False
+
+    delta = now - last
+    diff_in_minutes = round(delta.total_seconds() / 60)
+
+    if diff_in_minutes < COOLDOWN["minutes"]:
+        print(f"diff: {diff_in_minutes}")
+        return True
+
+    COOLDOWN['last'] = now
+    return False
 
 # TODO: Make me a database
 quotes = {} # { str : list[str] }
@@ -77,13 +101,14 @@ def quote(update: Update, context: CallbackContext):
 
 def arvon_paasihteeri(update: Update, context: CallbackContext):
     noppa = random.randint(0, 9)
-    if noppa == 0:
-	    paasihteeri="Politbyroo hyväksyy"
-    elif noppa == 1:
-        paasihteeri="...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan?"
-    else:
-	    paasihteeri="SIPERIAAN!"
-    context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
+    if not check_cooldown() or noppa == 1:
+        if noppa == 0:
+            paasihteeri = "Politbyroo hyväksyy"
+        elif noppa == 1:
+            paasihteeri = "...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan?"
+        else:
+            paasihteeri = "SIPERIAAN!"
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
 
 def main():
     global quotes
