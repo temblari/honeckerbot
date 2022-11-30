@@ -20,6 +20,8 @@ DBNAME = "honeckerdb"
 DBPASSWORD = os.environ.get('DBPASSWORD')
 SALAISUUS = os.environ.get('SALAISUUS')
 
+global horinat
+horinat = {"...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa"}
 
 # Cooldown related stuff
 COOLDOWN = {"minutes" : 1, "last" : None}
@@ -105,10 +107,13 @@ def arvon_paasihteeri(update: Update, context: CallbackContext):
         if noppa == 0:
             paasihteeri = "Politbyroo hyväksyy"
         elif noppa == 1:
-            paasihteeri = "...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan?"
+            paasihteeri = horinaa()
         else:
             paasihteeri = "SIPERIAAN!"
         context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
+
+def horinaa():
+    return random.choice(horinat)
 
 def main():
     global quotes
