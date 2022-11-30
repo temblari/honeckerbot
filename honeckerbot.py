@@ -71,6 +71,7 @@ def kansalaiseksi(update: Update, context: CallbackContext):
         context.bot.sendMessage(chat_id=update.effective_chat.id, text="Olet jo kansalainen")
     else:
         cursor.execute("INSERT INTO Stasi (Username, Credits) VALUES (%s, %s)", (name, 0))
+        db.commit()
         context.bot.sendMessage(chat_id=update.effective_chat.id, text="Olet nyt kansalainen")
 
 
@@ -78,6 +79,7 @@ def update_credit(name: str, amount: int):
     credits = cursor.execute("SELECT Credits FROM Stasi WHERE Username = %s", (name))
     credits = credits + amount
     cursor.execute("UPDATE Stasi SET Credits = %s WHERE Username = %s", (credits, name))
+    db.commit()
 
 
 def is_in_db(name: str) -> bool:
@@ -154,6 +156,7 @@ def save_quote(name : str, quote : str):
     )
     data = (name, quote)
     cursor.execute(insert_quotes, data)
+    db.commit()
 
 # TODO: use database
 def get_quote(name : str) -> str:
