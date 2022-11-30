@@ -43,8 +43,8 @@ def save_quote(name : str, quote : str):
        "INSERT INTO Quotes (name, quote) "
        "VALUES (%s, %s)"
     )
-    # data = (name, quote)
-    cursor.execute(insert_quotes, name, quote)
+    data = (name, quote)
+    cursor.execute(insert_quotes, data)
     #if not name in quotes:
     #    quotes[name] = [quote]
     #else:
