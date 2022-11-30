@@ -5,12 +5,12 @@ from telegram import Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, Filters, MessageHandler
 
 import datetime
-import json
+# import json
 import logging
 import os
 import random
 import re
-import requests
+# import requests
 
 import mysql.connector
 
@@ -20,10 +20,8 @@ DBNAME = "honeckerdb"
 DBPASSWORD = os.environ.get('DBPASSWORD')
 SALAISUUS = os.environ.get('SALAISUUS')
 
-global horinat
-global sleeps
 horinat = ["...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa"]
-unet = ["...zzz...zz...", "..zz...z...", "...zz..z.zz..."]
+unet = ["...zzz...zz...", "..zz...z...", "...zz..z.zz...", "..."]
 
 # Cooldown related stuff
 COOLDOWN = {"minutes" : 1, "last" : None}
@@ -156,16 +154,20 @@ def save_quote(name : str, quote : str):
     )
     data = (name, quote)
     cursor.execute(insert_quotes, data)
-    #if not name in quotes:
-    #    quotes[name] = [quote]
-    #else:
-    #    quotes[name].append(quote)
+
 # TODO: use database
 def get_quote(name : str) -> str:
-    if not name in quotes:
-        return f"No quotes exist for {name}"
-    else:
-        return random.choice(quotes[name])
+    select_quote = (
+        "SELECT quote FROM Quotes "
+        "WHERE name = %s "
+        "ORDER BY RAND() "
+        "LIMIT 1 "
+    )
+    return str(cursor.execute(select_quote, name))
+    #if not name in quotes:
+    #    return f"No quotes exist for {name}"
+    #else:
+    #    return random.choice(quotes[name])
 
 def add_quote(update: Update, context: CallbackContext):
     if len(context.args) < 2:
@@ -220,6 +222,10 @@ def main():
     handlers.append(CommandHandler("addquote", add_quote))
     handlers.append(CommandHandler("quote", quote))
     handlers.append(CommandHandler("dbtest", dbtest))
+    handlers.append(CommandHandler("kansalaiseksi", kansalaiseksi))
+    handlers.append(CommandHandler("kehu", kehu))
+    handlers.append(CommandHandler("ilmianna", ilmianna))
+    handlers.append(CommandHandler("tilanne", tilanne))
     handlers.append(MessageHandler(Filters.regex(honecker_re), arvon_paasihteeri))
 
     for handler in handlers:
