@@ -23,7 +23,7 @@ SALAISUUS = os.environ.get('SALAISUUS')
 global horinat
 global sleeps
 horinat = {"...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa"}
-sleeps = {"...zzz...zz...", "..zz...z...", "...zz..z.zz..."}
+unet = {"...zzz...zz...", "..zz...z...", "...zz..z.zz..."}
 
 # Cooldown related stuff
 COOLDOWN = {"minutes" : 1, "last" : None}
@@ -116,7 +116,7 @@ def horinaa():
     return random.choice(horinat)
 
 def sleeps():
-    return random.choice(sleeps)
+    return random.choice(unet)
 
 def main():
     global quotes
