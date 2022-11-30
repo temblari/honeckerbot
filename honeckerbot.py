@@ -101,6 +101,7 @@ def quote(update: Update, context: CallbackContext):
 ######################################################################################
 
 def arvon_paasihteeri(update: Update, context: CallbackContext):
+    paasihteeri = sleeps()
     noppa = random.randint(0, 9)
     if not check_cooldown() or noppa == 1:
         if noppa == 0:
@@ -109,9 +110,7 @@ def arvon_paasihteeri(update: Update, context: CallbackContext):
             paasihteeri = horinaa()
         else:
             paasihteeri = "SIPERIAAN!"
-        context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
-    else:
-        sleeps()
+     context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
 
 def horinaa():
     return random.choice(horinat)
