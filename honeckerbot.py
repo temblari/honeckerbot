@@ -53,23 +53,17 @@ def check_cooldown() -> bool:
     return False
 
 def noppa() -> int:
-    global noppa
     noppa = random.randint(0, 9)
     return noppa
 
 def arvon_paasihteeri(update: Update, context: CallbackContext):
     paasihteeri = sleeps()
-    noppa = noppa()
+    noppa = random.randint(0, 9)
     if not check_cooldown() or noppa == 1:
         if noppa == 0:
             paasihteeri = "Politbyroo hyväksyy"
         elif noppa == 1 or noppa == 2:
             paasihteeri = horinaa()
-            noppa = noppa()
-            if noppa == 0:
-                context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
-                time.sleep(noppa)
-                paasihteeri = "...GULAG!"
         else:
             paasihteeri = "SIPERIAAN!"
     context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
