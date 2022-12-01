@@ -193,15 +193,16 @@ def save_quote(name : str, quote : str, addedby : str):
 def get_quote(name : str) -> str:
     dbopen()
     select_quote = (
-        "SELECT * FROM Quotes "
+        "SELECT quote FROM Quotes "
         "WHERE name = %s "
         "ORDER BY RAND() "
         "LIMIT 1 "
     )
     data = [(name)]
-    data = cursor.execute(select_quote, data)
+    cursor.execute(select_quote, data)
+    quote = str(cursor.fetchall())
     dbclose()
-    return str(data)
+    return quote
     
     #if not name in quotes:
     #    return f"No quotes exist for {name}"
@@ -237,7 +238,7 @@ def main():
 
     updater = Updater(SALAISUUS, use_context=True)
     dispatcher = updater.dispatcher
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
     honecker_re = re.compile(r'arvon pääsihteeri', flags=re.IGNORECASE)
 
