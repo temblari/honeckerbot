@@ -182,7 +182,7 @@ def save_quote(name : str, quote : str, addedby : str):
     dbopen()
     timestamp = str(datetime.datetime.now())
     insert_quotes = (
-       "INSERT INTO Quotes (name, quote) "
+       "INSERT INTO Quotes (name, quote, addedby, timestamp) "
        "VALUES (%s, %s, %s, %s)"
     )
     data = (name, quote, addedby, timestamp)
