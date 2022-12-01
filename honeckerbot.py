@@ -85,7 +85,7 @@ def dbopen():
     global db
     global cursor
     db = initdb()
-    cursor = db.cursor()
+    cursor = db.cursor(buffered=True)
     
 def dbclose():
     db.commit()
@@ -192,14 +192,15 @@ def save_quote(name : str, quote : str):
 def get_quote(name : str) -> str:
     dbopen()
     select_quote = (
-        "SELECT quote FROM Quotes "
+        "SELECT name quote FROM Quotes "
         "WHERE name = %s "
         "ORDER BY RAND() "
         "LIMIT 1 "
     )
-    yyyy = cursor.execute(select_quote, name)
+    data = [(name)]
+    cursor.execute(select_quote, data)
     dbclose()
-    return str(yyyy)
+    return str(cursor)
     
     #if not name in quotes:
     #    return f"No quotes exist for {name}"
