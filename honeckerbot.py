@@ -10,6 +10,7 @@ import logging
 import os
 import random
 import re
+import time
 # import requests
 
 import mysql.connector
@@ -20,7 +21,7 @@ DBNAME = "honeckerdb"
 DBPASSWORD = os.environ.get('DBPASSWORD')
 SALAISUUS = os.environ.get('SALAISUUS')
 
-horinat = ["...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa", "mä en nyt jaksa"]
+horinat = ["...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa", "mä en nyt jaksa", "sano mua johtajaks"]
 unet = ["...zzz...zz...", "..zz...z...", "...zz..z.zz...", "..."]
 
 def horinaa():
@@ -51,14 +52,24 @@ def check_cooldown() -> bool:
     COOLDOWN['last'] = now
     return False
 
+def noppa() -> int:
+    global noppa
+    noppa = random.randint(0, 9)
+    return noppa
+
 def arvon_paasihteeri(update: Update, context: CallbackContext):
     paasihteeri = sleeps()
-    noppa = random.randint(0, 9)
+    noppa = noppa()
     if not check_cooldown() or noppa == 1:
         if noppa == 0:
             paasihteeri = "Politbyroo hyväksyy"
-        elif noppa == 1:
+        elif noppa == 1 or noppa == 2:
             paasihteeri = horinaa()
+            noppa = noppa()
+            if noppa == 0:
+                context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
+                time.sleep(noppa)
+                paasihteeri = "...GULAG!"
         else:
             paasihteeri = "SIPERIAAN!"
     context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
@@ -292,6 +303,7 @@ def main():
     global quotes
     global db
     global cursor
+    global noppa
 
     updater = Updater(SALAISUUS, use_context=True)
     dispatcher = updater.dispatcher
