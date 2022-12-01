@@ -66,7 +66,7 @@ def arvon_paasihteeri(update: Update, context: CallbackContext):
         elif noppa == 1 or noppa == 2:
             paasihteeri = horinaa()
             noppa = noppa()
-            if noppa = 0:
+            if noppa == 0:
                 context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
                 time.sleep(noppa)
                 paasihteeri = "...GULAG!"
