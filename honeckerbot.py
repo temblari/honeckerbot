@@ -123,7 +123,7 @@ def update_credit(name: str, amount: int):
 def is_in_db(name: str) -> bool:
     dbopen()
 
-    cursor.execute("SELECT * FROM stasi WHERE username = %s", [(name)])
+    cursor.execute("SELECT * FROM Stasi WHERE username = %s", [(name)])
     return cursor.rowcount > 0
 
     dbclose()
@@ -181,7 +181,7 @@ def tilanne(update: Update, context: CallbackContext):
     user.strip('@')
 
     if is_in_db(user):
-        credits = cursor.execute("SELECT Credits FROM stasi WHERE username = %s", (user))
+        credits = cursor.execute("SELECT Credits FROM Stasi WHERE username = %s", (user))
 
         if credits < 0:
             response = f"{credits} pisteitä, kuolema on sinun kohtalosi"
