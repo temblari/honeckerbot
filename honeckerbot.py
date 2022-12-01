@@ -301,6 +301,7 @@ def main():
     global quotes
     global db
     global cursor
+    global noppa
 
     updater = Updater(SALAISUUS, use_context=True)
     dispatcher = updater.dispatcher
