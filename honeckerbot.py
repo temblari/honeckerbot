@@ -147,7 +147,7 @@ def ilmianna(update: Update, context: CallbackContext):
             context.bot.sendMessage(chat_id=update.effective_chat.id, text="Pääsihteeri ei voi tehdä väärin")
 
         if is_in_db(subject):
-            punishment = random.randint(-1, -100)
+            punishment = random.randint(-100, 0)
             update_credit(subject, punishment)
 
             response = f"@{subject}, pääsihteeri on vihainen:\n-{punishment} pistettä: {reason}"
