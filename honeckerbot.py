@@ -113,7 +113,8 @@ def kansalaiseksi(update: Update, context: CallbackContext):
 def update_credit(name: str, amount: int):
     dbopen()
 
-    credits = cursor.execute("SELECT Credits FROM Stasi WHERE Username = %s", [(name)])
+    cursor.execute("SELECT Credits FROM Stasi WHERE Username = %s", [(name)])
+    credits = int(cursor.fetchone()[0])
     credits = credits + amount
     cursor.execute("UPDATE Stasi SET Credits = %s WHERE Username = %s", (credits, name))
 
