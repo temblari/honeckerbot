@@ -221,13 +221,16 @@ def add_quote(update: Update, context: CallbackContext):
         if quote[0] == '"' and quote[len(quote) - 1] == '"':
             quote = quote[1:len(quote) - 1]
     save_quote(name, quote, addedby)
-    context.bot.sendMessage(chat_id=update.message.chat.id, text='Quote saved!') # maybe not necessary to inform of success
+    #context.bot.sendMessage(chat_id=update.message.chat.id, text='Quote saved!') # maybe not necessary to inform of success
 
 def quote(update: Update, context: CallbackContext):
+    try:
         name = context.args[0].strip('@')
         quote = get_quote(name)
         formated_quote = f'"{quote}" - {name}'
         context.bot.sendMessage(chat_id=update.message.chat.id, text=formated_quote)
+    except:
+        pass
 
 # main
 ######################################################################################
