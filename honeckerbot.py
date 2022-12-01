@@ -197,8 +197,10 @@ def get_quote(name : str) -> str:
         "ORDER BY RAND() "
         "LIMIT 1 "
     )
-    return str(cursor.execute(select_quote, name))
+    yyyy = cursor.execute(select_quote, name)
     dbclose()
+    return str(yyyy)
+    
     #if not name in quotes:
     #    return f"No quotes exist for {name}"
     #else:
