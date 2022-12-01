@@ -178,14 +178,14 @@ def tilanne(update: Update, context: CallbackContext):
 # QUOTE 
 ######################################################################################
 # TODO: use database
-def save_quote(name : str, quote : str):
+def save_quote(name : str, quote : str, addedby : str):
     dbopen()
     timestamp = str(datetime.datetime.now())
     insert_quotes = (
        "INSERT INTO Quotes (name, quote) "
-       "VALUES (%s, %s, %s)"
+       "VALUES (%s, %s, %s, %s)"
     )
-    data = (name, quote, timestamp)
+    data = (name, quote, addedby, timestamp)
     cursor.execute(insert_quotes, data)
     dbclose()
 
@@ -214,9 +214,12 @@ def add_quote(update: Update, context: CallbackContext):
     else:
         name = context.args[0].strip('@')
         quote = ' '.join(context.args[1:])
+        print("EBIN DEUBG PRINT")
+        print(context.update.message.chat.id)
+        addedby = context.message.username
         if quote[0] == '"' and quote[len(quote) - 1] == '"':
             quote = quote[1:len(quote) - 1]
-    save_quote(name, quote)
+    save_quote(name, quote, addedby)
     context.bot.sendMessage(chat_id=update.message.chat.id, text='Quote saved!') # maybe not necessary to inform of success
 
 def quote(update: Update, context: CallbackContext):
@@ -234,7 +237,7 @@ def main():
 
     updater = Updater(SALAISUUS, use_context=True)
     dispatcher = updater.dispatcher
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
     honecker_re = re.compile(r'arvon pääsihteeri', flags=re.IGNORECASE)
 
