@@ -181,7 +181,8 @@ def tilanne(update: Update, context: CallbackContext):
     user.strip('@')
 
     if is_in_db(user):
-        credits = cursor.execute("SELECT Credits FROM Stasi WHERE username = %s", [(user)])
+        cursor.execute("SELECT Credits FROM Stasi WHERE username = %s", [(user)])
+        credits = int(cursor.fetchone()[0])
 
         if credits < 0:
             response = f"{credits} pisteitä, kuolema on sinun kohtalosi"
