@@ -214,9 +214,9 @@ def add_quote(update: Update, context: CallbackContext):
     else:
         name = context.args[0].strip('@')
         quote = ' '.join(context.args[1:])
-        print("EBIN DEUBG PRINT")
-        print(context.update.message.chat.id)
-        addedby = context.message.username
+        #print("EBIN DEUBG PRINT")
+        #print(update.message.chat_id)
+        addedby = str(update.message.from_user.username) 
         if quote[0] == '"' and quote[len(quote) - 1] == '"':
             quote = quote[1:len(quote) - 1]
     save_quote(name, quote, addedby)
