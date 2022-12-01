@@ -5,7 +5,6 @@ from telegram import Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, Filters, MessageHandler
 
 import datetime
-from datetime import datetime
 # import json
 import logging
 import os
@@ -181,7 +180,7 @@ def tilanne(update: Update, context: CallbackContext):
 # TODO: use database
 def save_quote(name : str, quote : str):
     dbopen()
-    timestamp = str(datetime.now())
+    timestamp = str(datetime.datetime.now())
     insert_quotes = (
        "INSERT INTO Quotes (name, quote) "
        "VALUES (%s, %s, %s)"
