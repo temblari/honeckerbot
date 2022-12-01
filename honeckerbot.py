@@ -20,8 +20,14 @@ DBNAME = "honeckerdb"
 DBPASSWORD = os.environ.get('DBPASSWORD')
 SALAISUUS = os.environ.get('SALAISUUS')
 
-horinat = ["...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa"]
+horinat = ["...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa", "mä en nyt jaksa"]
 unet = ["...zzz...zz...", "..zz...z...", "...zz..z.zz...", "..."]
+
+def horinaa():
+    return random.choice(horinat)
+
+def sleeps():
+    return random.choice(unet)
 
 # Cooldown related stuff
 COOLDOWN = {"minutes" : 1, "last" : None}
@@ -45,10 +51,27 @@ def check_cooldown() -> bool:
     COOLDOWN['last'] = now
     return False
 
-def dbtest(update: Update, context: CallbackContext):
-    tuloste = str(cursor.execute("show tables"))
-    context.bot.sendMessage(chat_id=update.effective_chat.id, text=tuloste)
+def arvon_paasihteeri(update: Update, context: CallbackContext):
+    paasihteeri = sleeps()
+    noppa = random.randint(0, 9)
+    if not check_cooldown() or noppa == 1:
+        if noppa == 0:
+            paasihteeri = "Politbyroo hyväksyy"
+        elif noppa == 1:
+            paasihteeri = horinaa()
+        else:
+            paasihteeri = "SIPERIAAN!"
+    context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
 
+# DB
+#####################################################################################
+
+def dbtest(update: Update, context: CallbackContext):
+    dbopen()
+    tuloste = str(cursor.execute("show tables"))
+    context.bot.sendMessage(chat_id=update.effective_chat.id, text=cursor)
+    dbclose()
+    
 def initdb():
     return mysql.connector.connect(
         host = DBHOST,
@@ -57,12 +80,17 @@ def initdb():
         database = DBNAME
         )
 
+def dbopen():
+    db = initdb()
+    cursor = db.cursor()
+    
+def dbclose():
+    db.commit()
+    cursor.close()
+    db.close()
 
-#########
-# SOCIAL CREDITS #
+# SOCIAL CREDITS 
 ######################################################################################
-
-
 def kansalaiseksi(update: Update, context: CallbackContext):
     name = context.message.from_user.username
     name.strip('@')
@@ -144,22 +172,22 @@ def tilanne(update: Update, context: CallbackContext):
 
     context.bot.sendMessage(chat_id=update.effective_chat.id, text=response)
 
-
-#########
-# QUOTE #
+# QUOTE 
 ######################################################################################
 # TODO: use database
 def save_quote(name : str, quote : str):
+    dbopen()
     insert_quotes = (
        "INSERT INTO Quotes (name, quote) "
        "VALUES (%s, %s)"
     )
     data = (name, quote)
     cursor.execute(insert_quotes, data)
-    db.commit()
+    dbclose()
 
 # TODO: use database
 def get_quote(name : str) -> str:
+    dbopen()
     select_quote = (
         "SELECT quote FROM Quotes "
         "WHERE name = %s "
@@ -167,6 +195,7 @@ def get_quote(name : str) -> str:
         "LIMIT 1 "
     )
     return str(cursor.execute(select_quote, name))
+    dbclose()
     #if not name in quotes:
     #    return f"No quotes exist for {name}"
     #else:
@@ -189,32 +218,13 @@ def quote(update: Update, context: CallbackContext):
         formated_quote = f'"{quote}" - {name}'
         context.bot.sendMessage(chat_id=update.message.chat.id, text=formated_quote)
 
+# main
 ######################################################################################
-
-def arvon_paasihteeri(update: Update, context: CallbackContext):
-    paasihteeri = sleeps()
-    noppa = random.randint(0, 9)
-    if not check_cooldown() or noppa == 1:
-        if noppa == 0:
-            paasihteeri = "Politbyroo hyväksyy"
-        elif noppa == 1:
-            paasihteeri = horinaa()
-        else:
-            paasihteeri = "SIPERIAAN!"
-    context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
-
-def horinaa():
-    return random.choice(horinat)
-
-def sleeps():
-    return random.choice(unet)
-
 def main():
     global quotes
     global db
     global cursor
-    db = initdb()
-    cursor = db.cursor()
+
     updater = Updater(SALAISUUS, use_context=True)
     dispatcher = updater.dispatcher
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
