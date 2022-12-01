@@ -73,7 +73,7 @@ def arvon_paasihteeri(update: Update, context: CallbackContext):
 
 def dbtest(update: Update, context: CallbackContext):
     dbopen()
-    cursor.execute("show tables")
+    cursor.execute("SELECT * FROM Stasi")
     for x in cursor:
         context.bot.sendMessage(chat_id=update.effective_chat.id, text=x)
     dbclose()
