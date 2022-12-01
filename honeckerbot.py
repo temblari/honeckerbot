@@ -68,8 +68,9 @@ def arvon_paasihteeri(update: Update, context: CallbackContext):
 
 def dbtest(update: Update, context: CallbackContext):
     dbopen()
-    tuloste = str(cursor.execute("show tables"))
-    context.bot.sendMessage(chat_id=update.effective_chat.id, text=cursor)
+    cursor.execute("show tables")
+    for x in cursor:
+        context.bot.sendMessage(chat_id=update.effective_chat.id, text=x)
     dbclose()
     
 def initdb():
@@ -81,6 +82,8 @@ def initdb():
         )
 
 def dbopen():
+    global db
+    global cursor
     db = initdb()
     cursor = db.cursor()
     
