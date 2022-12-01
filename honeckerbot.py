@@ -5,6 +5,7 @@ from telegram import Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, Filters, MessageHandler
 
 import datetime
+from datetime import datetime
 # import json
 import logging
 import os
@@ -180,11 +181,12 @@ def tilanne(update: Update, context: CallbackContext):
 # TODO: use database
 def save_quote(name : str, quote : str):
     dbopen()
+    timestamp = str(datetime.now())
     insert_quotes = (
        "INSERT INTO Quotes (name, quote) "
-       "VALUES (%s, %s)"
+       "VALUES (%s, %s, %s)"
     )
-    data = (name, quote)
+    data = (name, quote, timestamp)
     cursor.execute(insert_quotes, data)
     dbclose()
 
@@ -192,15 +194,15 @@ def save_quote(name : str, quote : str):
 def get_quote(name : str) -> str:
     dbopen()
     select_quote = (
-        "SELECT name quote FROM Quotes "
+        "SELECT * FROM Quotes "
         "WHERE name = %s "
         "ORDER BY RAND() "
         "LIMIT 1 "
     )
     data = [(name)]
-    cursor.execute(select_quote, data)
+    data = cursor.execute(select_quote, data)
     dbclose()
-    return str(cursor)
+    return str(data)
     
     #if not name in quotes:
     #    return f"No quotes exist for {name}"
