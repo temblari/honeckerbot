@@ -131,10 +131,6 @@ def is_in_db(name: str) -> bool:
 
 
 def ilmianna(update: Update, context: CallbackContext):
-    subject = ""
-    reason = ""
-    response = ""
-
     if len(context.args) < 2:
         response = "Usage: /vinkkaa <henkilö> <syy>"
 
@@ -147,10 +143,10 @@ def ilmianna(update: Update, context: CallbackContext):
             context.bot.sendMessage(chat_id=update.effective_chat.id, text="Pääsihteeri ei voi tehdä väärin")
 
         if is_in_db(subject):
-            punishment = random.randint(-100, 0)
+            punishment = random.randint(-100, -1)
             update_credit(subject, punishment)
 
-            response = f"@{subject}, pääsihteeri on vihainen:\n-{punishment} pistettä: {reason}"
+            response = f"@{subject}, pääsihteeri on vihainen:\n{punishment} pistettä: {reason}"
         else:
             response = f"Henkilö ei ole kansalainen"
 
@@ -162,14 +158,16 @@ def kehu(update: Update, context: CallbackContext):
         response = "Usage: /kehu <name> <syy>"
     elif context.args[0].strip('@') == "honeckerbot":
         response = "Tiesin jo"
+    elif context.args[0].strip('@') == update.message.from_user.username:
+        response = "Et voi kehua itseäsi"
     else:
-        name = context.args[0].strip('@')
+        subject = context.args[0].strip('@')
         reason = ' '.join(context.args[1:])
 
         price = random.randint(1, 10)
-        update_credit(name, price)
+        update_credit(subject, price)
 
-        response = f"@{name}, pääsihteeri on tyytyväinen:\n+{price} pistettä: {reason}"
+        response = f"@{subject}, pääsihteeri on tyytyväinen:\n+{price} pistettä: {reason}"
 
     context.bot.sendMessage(chat_id=update.effective_chat.id, text=response)
 
@@ -186,11 +184,13 @@ def tilanne(update: Update, context: CallbackContext):
         credits = int(cursor.fetchone()[0])
 
         if credits < 0:
-            response = f"{credits} pisteitä, kuolema on sinun kohtalosi"
+            response = f"{credits} {'piste' if credits == -1 else 'pistettä'}, kuolema on sinun kohtalosi"
+        elif credits == 0:
+            response = f"0 pistettä, teitä valvotaan tarkalla silmällä"
         elif credits < 100:
-            response = f"{credits} pisteitä, olet ihan ok kansalainen"
+            response = f"{credits} {'piste' if credits == 1 else 'pistettä'}, takaisin töihin"
         elif credits < 100:
-            response = f"{credits} pisteitä, olet hyvä kansalainen"
+            response = f"{credits} pistettä, olet hyvä kansalainen"
 
     else:
         response = "Et ole kansalainen"
@@ -198,6 +198,34 @@ def tilanne(update: Update, context: CallbackContext):
     context.bot.sendMessage(chat_id=update.effective_chat.id, text=response)
 
     dbclose()
+
+
+def paras_kansalainen(update: Update, context: CallbackContext):
+    dbopen()
+
+    cursor.execute("SELECT Username, Credits FROM Stasi ORDER BY Credits DESC LIMIT 1")
+    result = cursor.fetchone()
+
+    if result:
+        response = f"Paras kansalainen on @{result[0]} {result[1]} {'pisteellä' if result[1] == 1 else 'pisteillä'}"
+    else:
+        response = "Ei vielä yhtään kansalaista"
+
+    context.bot.sendMessage(chat_id=update.effective_chat.id, text=response)
+
+    dbclose()
+
+
+def seksi(update: Update, context: CallbackContext):
+    user = update.message.from_user.username
+    response = "Ei tälleen"
+
+    if is_in_db(user):
+        update_credit(user, -100)
+        response += ", -100 pistettä"
+
+    context.bot.sendMessage(chat_id=update.effective_chat.id, text=response)
+
 
 # QUOTE 
 ######################################################################################
@@ -274,9 +302,11 @@ def main():
     handlers.append(CommandHandler("quote", quote))
     handlers.append(CommandHandler("dbtest", dbtest))
     handlers.append(CommandHandler("kansalaiseksi", kansalaiseksi))
+    handlers.append(CommandHandler("seksi", seksi))
     handlers.append(CommandHandler("kehu", kehu))
     handlers.append(CommandHandler("ilmianna", ilmianna))
     handlers.append(CommandHandler("tilanne", tilanne))
+    handlers.append(CommandHandler("paras", paras_kansalainen))
     handlers.append(MessageHandler(Filters.regex(honecker_re), arvon_paasihteeri))
 
     for handler in handlers:
