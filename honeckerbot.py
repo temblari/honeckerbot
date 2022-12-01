@@ -113,10 +113,9 @@ def kansalaiseksi(update: Update, context: CallbackContext):
 def update_credit(name: str, amount: int):
     dbopen()
 
-    credits = cursor.execute("SELECT Credits FROM Stasi WHERE Username = %s", (name))
+    credits = cursor.execute("SELECT Credits FROM Stasi WHERE Username = %s", [(name)])
     credits = credits + amount
     cursor.execute("UPDATE Stasi SET Credits = %s WHERE Username = %s", (credits, name))
-    db.commit()
 
     dbclose()
 
@@ -124,7 +123,7 @@ def update_credit(name: str, amount: int):
 def is_in_db(name: str) -> bool:
     dbopen()
 
-    cursor.execute("SELECT * FROM stasi WHERE username = %s", (name))
+    cursor.execute("SELECT * FROM stasi WHERE username = %s", [(name)])
     return cursor.rowcount > 0
 
     dbclose()
