@@ -200,7 +200,7 @@ def get_quote(name : str) -> str:
     )
     data = [(name)]
     cursor.execute(select_quote, data)
-    quote = str(cursor.fetchall())
+    quote = str(cursor.fetchone()[0])
     dbclose()
     return quote
     
