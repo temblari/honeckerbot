@@ -139,7 +139,7 @@ def ilmianna(update: Update, context: CallbackContext):
         reason = ' '.join(context.args[1:])
 
         # check for valid username
-        if subject == "honeckerbot":
+        if subject == "honeckerbot" or subject == "pääsihteeri":
             context.bot.sendMessage(chat_id=update.effective_chat.id, text="Pääsihteeri ei voi tehdä väärin")
 
         if is_in_db(subject):
@@ -156,7 +156,7 @@ def ilmianna(update: Update, context: CallbackContext):
 def kehu(update: Update, context: CallbackContext):
     if len(context.args) < 2:
         response = "Usage: /kehu <name> <syy>"
-    elif context.args[0].strip('@') == "honeckerbot":
+    elif context.args[0].strip('@') == "honeckerbot"  or context.args[0] == "pääsihteeri":
         response = "Tiesin jo"
     elif context.args[0].strip('@') == update.message.from_user.username:
         response = "Et voi kehua itseäsi"
