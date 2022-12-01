@@ -141,8 +141,10 @@ def ilmianna(update: Update, context: CallbackContext):
         # check for valid username
         if subject == "honeckerbot" or subject == "pääsihteeri":
             context.bot.sendMessage(chat_id=update.effective_chat.id, text="Pääsihteeri ei voi tehdä väärin")
+            if is_in_db(update.message.from_user.username):
+                update_credit(update.message.from_user.username, -100)
 
-        if is_in_db(subject):
+        elif is_in_db(subject):
             punishment = random.randint(-100, -1)
             update_credit(subject, punishment)
 
