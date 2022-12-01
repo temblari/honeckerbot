@@ -160,6 +160,8 @@ def kehu(update: Update, context: CallbackContext):
         response = "Tiesin jo"
     elif context.args[0].strip('@') == update.message.from_user.username:
         response = "Et voi kehua itseäsi"
+    elif not is_in_db(context.args[0].strip('@')):
+        response = "Henkilö ei ole kansalainen"
     else:
         subject = context.args[0].strip('@')
         reason = ' '.join(context.args[1:])
