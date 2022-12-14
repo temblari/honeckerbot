@@ -5,13 +5,11 @@ from telegram import Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, Filters, MessageHandler
 
 import datetime
-# import json
 import logging
 import os
 import random
 import re
 import time
-# import requests
 
 import mysql.connector
 
@@ -22,51 +20,26 @@ DBPASSWORD = os.environ.get('DBPASSWORD')
 SALAISUUS = os.environ.get('SALAISUUS')
 
 horinat = ["...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa", "mä en nyt jaksa", "sano mua johtajaks"]
-unet = ["...zzz...zz...", "..zz...z...", "...zz..z.zz...", "..."]
 
 def horinaa():
     return random.choice(horinat)
-
-def sleeps():
-    return random.choice(unet)
-
-# Cooldown related stuff
-COOLDOWN = {"minutes" : 1, "last" : None}
-
-def check_cooldown() -> bool:
-    global COOLDOWN
-    now = datetime.datetime.now()
-    last = COOLDOWN["last"]
-
-    if last == None:
-        COOLDOWN["last"] = now
-        return False
-
-    delta = now - last
-    diff_in_minutes = round(delta.total_seconds() / 60)
-
-    if diff_in_minutes < COOLDOWN["minutes"]:
-        print(f"diff: {diff_in_minutes}")
-        return True
-
-    COOLDOWN['last'] = now
-    return False
 
 def noppa() -> int:
     noppa = random.randint(0, 9)
     return noppa
 
 def arvon_paasihteeri(update: Update, context: CallbackContext):
-    paasihteeri = sleeps()
-    noppa = random.randint(0, 9)
-    if not check_cooldown() or noppa == 1:
-        if noppa == 0:
-            paasihteeri = "Politbyroo hyväksyy"
-        elif noppa == 1 or noppa == 2:
-            paasihteeri = horinaa()
-        else:
-            paasihteeri = "SIPERIAAN!"
+    noppa = random.randint(0, 12)
+
+    if noppa == 0:
+        paasihteeri = "Politbyroo hyväksyy"
+    elif noppa == 1:
+        paasihteeri = horinaa()
+    else:
+        paasihteeri = "SIPERIAAN!"
+
     context.bot.sendMessage(chat_id=update.effective_chat.id, text=paasihteeri)
+
 
 # DB
 #####################################################################################
@@ -77,7 +50,7 @@ def dbtest(update: Update, context: CallbackContext):
     for x in cursor:
         context.bot.sendMessage(chat_id=update.effective_chat.id, text=x)
     dbclose()
-    
+
 def initdb():
     return mysql.connector.connect(
         host = DBHOST,
@@ -91,7 +64,7 @@ def dbopen():
     global cursor
     db = initdb()
     cursor = db.cursor(buffered=True)
-    
+
 def dbclose():
     db.commit()
     cursor.close()
@@ -111,7 +84,7 @@ def kansalaiseksi(update: Update, context: CallbackContext):
         cursor.execute("INSERT INTO Stasi (Username, Credits) VALUES (%s, %s)", (name, 0))
         db.commit()
         context.bot.sendMessage(chat_id=update.effective_chat.id, text="Olet nyt kansalainen")
-    
+
     dbclose()
 
 
@@ -238,7 +211,6 @@ def seksi(update: Update, context: CallbackContext):
 
 # QUOTE 
 ######################################################################################
-# TODO: use database
 def save_quote(name : str, quote : str, addedby : str):
     dbopen()
     timestamp = str(datetime.datetime.now())
@@ -250,7 +222,6 @@ def save_quote(name : str, quote : str, addedby : str):
     cursor.execute(insert_quotes, data)
     dbclose()
 
-# TODO: use database
 def get_quote(name : str) -> str:
     dbopen()
     select_quote = (
@@ -264,11 +235,6 @@ def get_quote(name : str) -> str:
     quote = str(cursor.fetchone()[0])
     dbclose()
     return quote
-    
-    #if not name in quotes:
-    #    return f"No quotes exist for {name}"
-    #else:
-    #    return random.choice(quotes[name])
 
 def add_quote(update: Update, context: CallbackContext):
     if len(context.args) < 2:
@@ -276,13 +242,10 @@ def add_quote(update: Update, context: CallbackContext):
     else:
         name = context.args[0].strip('@')
         quote = ' '.join(context.args[1:])
-        #print("EBIN DEUBG PRINT")
-        #print(update.message.chat_id)
         addedby = str(update.message.from_user.username) 
         if quote[0] == '"' and quote[len(quote) - 1] == '"':
             quote = quote[1:len(quote) - 1]
     save_quote(name, quote, addedby)
-    #context.bot.sendMessage(chat_id=update.message.chat.id, text='Quote saved!') # maybe not necessary to inform of success
 
 def quote(update: Update, context: CallbackContext):
     try:
@@ -305,19 +268,22 @@ def main():
     dispatcher = updater.dispatcher
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-    honecker_re = re.compile(r'arvon pääsihteeri', flags=re.IGNORECASE)
+    paasihteeri_re = re.compile(r'arvon pääsihteeri', flags=re.IGNORECASE)
+    #addquote_re = re.compile(r'!! lisaaloki', flags=re.IGNORECASE)
+    #quote_re = re.compile(r'!! loki', flags=re.IGNORECASE)
 
-    handlers = []
-    handlers.append(CommandHandler("addquote", add_quote))
-    handlers.append(CommandHandler("quote", quote))
-    handlers.append(CommandHandler("dbtest", dbtest))
-    handlers.append(CommandHandler("kansalaiseksi", kansalaiseksi))
-    handlers.append(CommandHandler("seksi", seksi))
-    handlers.append(CommandHandler("kehu", kehu))
-    handlers.append(CommandHandler("ilmianna", ilmianna))
-    handlers.append(CommandHandler("tilanne", tilanne))
-    handlers.append(CommandHandler("paras", paras_kansalainen))
-    handlers.append(MessageHandler(Filters.regex(honecker_re), arvon_paasihteeri))
+    handlers = [
+        CommandHandler("lisaaloki", add_quote),
+        CommandHandler("loki", quote),
+        CommandHandler("dbtest", dbtest),
+        CommandHandler("kansalaiseksi", kansalaiseksi),
+        CommandHandler("seksi", seksi),
+        CommandHandler("kehu", kehu),
+        CommandHandler("ilmianna", ilmianna),
+        CommandHandler("tilanne", tilanne),
+        CommandHandler("paras", paras_kansalainen),
+        MessageHandler(Filters.regex(paasihteeri_re), arvon_paasihteeri)
+    ]
 
     for handler in handlers:
         dispatcher.add_handler(handler)
