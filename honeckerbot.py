@@ -48,9 +48,11 @@ def arvon_paasihteeri(update: Update, context: CallbackContext):
 
 def dbtest(update: Update, context: CallbackContext):
     dbopen()
+    stats=''
     cursor.execute("SELECT * FROM Stasi")
     for x in cursor:
-        stats+=("\n".join(x))
+        x = str(x)
+        stats+=("".join(x))
     context.bot.sendMessage(chat_id=update.effective_chat.id, text=stats)
     dbclose()
 
