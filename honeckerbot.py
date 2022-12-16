@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from pytz import timezone
 from telegram import Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, Filters, MessageHandler
 
@@ -17,6 +18,7 @@ DBHOST = "localhost"
 DBUSER = "honecker"
 DBNAME = "honeckerdb"
 DBPASSWORD = os.environ.get('DBPASSWORD')
+GROUP_ID = os.environ.get('GROUP_ID')
 SALAISUUS = os.environ.get('SALAISUUS')
 
 horinat = ["...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti nyt tarkkaan...", "suututtaa", "mä en nyt jaksa", "sano mua johtajaks"]
@@ -31,9 +33,9 @@ def noppa() -> int:
 def arvon_paasihteeri(update: Update, context: CallbackContext):
     noppa = random.randint(0, 12)
 
-    if noppa == 0:
+    if noppa == 1:
         paasihteeri = "Politbyroo hyväksyy"
-    elif noppa == 1:
+    elif noppa == 2:
         paasihteeri = horinaa()
     else:
         paasihteeri = "SIPERIAAN!"
@@ -256,6 +258,63 @@ def quote(update: Update, context: CallbackContext):
     except:
         pass
 
+# DOKAUSKALENTERI
+######################################################################################
+dokaus_days = {} # {date: list[str]}
+
+def listaa_dokaukset() -> str:
+    global dokaus_days
+    dokaukset = ""
+    for day in dokaus_days:
+        dokaukset = dokaukset + str(day) + " "
+        for dokaus in dokaus_days[day]:
+            dokaukset += dokaus
+            dokaukset += " "
+        dokaukset += "\n"
+
+    return dokaukset
+
+
+def dokataanko_tanaan() -> tuple[bool, str]:
+    global dokaus_days
+    today = datetime.date.today()
+    if today in dokaus_days:
+        return True, dokaus_days[today]
+    return False, ""
+
+
+def save_dokaus(date, reason : str):
+    global dokaus_days
+    if not date in dokaus_days:
+        dokaus_days[date] = [reason]
+    else:
+        dokaus_days[date].append(reason)
+
+def add_dokaus(update: Update, context: CallbackContext):
+    if len(context.args) < 2:
+            context.bot.sendMessage(chat_id=update.message.chat.id, text='Usage: /dokausta <DD.MM.YYYY> <reason>')
+    else:
+        try:
+            date = datetime.datetime.strptime(context.args[0], '%d.%m.%Y').date()
+        except ValueError:
+            context.bot.sendMessage(chat_id=update.message.chat.id, text='Usage: /dokausta <DD.MM.YYYY> <reason>')
+
+        reason = ' '.join(context.args[1:])
+        save_dokaus(date, reason)
+        if date == datetime.date.today():
+            context.bot.sendMessage(chat_id=update.message.chat.id, text=f'Tänään vissiin dokataan: {reason}')
+
+def dokaukset(update: Update, context: CallbackContext):
+    dokaukset = listaa_dokaukset()
+    if not dokaukset == "":
+        context.bot.sendMessage(chat_id=update.message.chat.id, text=dokaukset)
+
+def callback_dokaus(context: CallbackContext):
+    res = dokataanko_tanaan()
+    if res[0]:
+        context.bot.send_message(chat_id=GROUP_ID, text=f'Tänään dokataan: {res[1]}')
+
+
 # main
 ######################################################################################
 def main():
@@ -266,11 +325,13 @@ def main():
 
     updater = Updater(SALAISUUS, use_context=True)
     dispatcher = updater.dispatcher
+    jobs = updater.job_queue
+
+    dokaus_check_time = datetime.time(9, 00, tzinfo=timezone('Europe/Helsinki'))
+    jobs.run_daily(callback_dokaus, dokaus_check_time)
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
     paasihteeri_re = re.compile(r'arvon pääsihteeri', flags=re.IGNORECASE)
-    #addquote_re = re.compile(r'!! lisaaloki', flags=re.IGNORECASE)
-    #quote_re = re.compile(r'!! loki', flags=re.IGNORECASE)
 
     handlers = [
         CommandHandler("lisaaloki", add_quote),
@@ -282,6 +343,8 @@ def main():
         CommandHandler("ilmianna", ilmianna),
         CommandHandler("tilanne", tilanne),
         CommandHandler("paras", paras_kansalainen),
+        CommandHandler("dokausta", add_dokaus),
+        CommandHandler("dokaukset", dokaukset),
         MessageHandler(Filters.regex(paasihteeri_re), arvon_paasihteeri)
     ]
 
