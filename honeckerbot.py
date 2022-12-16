@@ -50,7 +50,8 @@ def dbtest(update: Update, context: CallbackContext):
     dbopen()
     cursor.execute("SELECT * FROM Stasi")
     for x in cursor:
-        context.bot.sendMessage(chat_id=update.effective_chat.id, text=x)
+        stats+=("\n".join(x))
+    context.bot.sendMessage(chat_id=update.effective_chat.id, text=stats)
     dbclose()
 
 def initdb():
