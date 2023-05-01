@@ -32,7 +32,7 @@ def initdb():
     c.execute('CREATE TABLE IF NOT EXISTS Stasi('
               'Username VARCHAR(255) NOT NULL,'
               'Credits INT NOT NULL,'
-              'PRIMARY KEY (Username)')
+              'PRIMARY KEY (Username) )')
 
     c.execute('CREATE TABLE IF NOT EXISTS Dokaukset('
               'id INT NOT NULL AUTO_INCREMENT,'
@@ -40,7 +40,7 @@ def initdb():
               'reason VARCHAR(500) NOT NULL,'
               'addedby VARCHAR(255) NOT NULL,'
               'timestamp TIMESTAMP NOT NULL,'
-              'PRIMARY KEY (id)')
+              'PRIMARY KEY (id) )')
 
     conn.commit()
     conn.close()
