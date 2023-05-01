@@ -26,9 +26,9 @@ horinat = ["...huh, anteeksi, torkahdin hetkeksi, kysyisitkö uudestaan", "mieti
 def horinaa():
     return random.choice(horinat)
 
-def noppa() -> int:
-    noppa = random.randint(0, 9)
-    return noppa
+#def noppa() -> int:
+#    noppa = random.randint(0, 9)
+#    return noppa
 
 def arvon_paasihteeri(update: Update, context: CallbackContext):
     noppa = random.randint(0, 10)
