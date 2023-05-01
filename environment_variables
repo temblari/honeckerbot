@@ -1,5 +1,7 @@
 DBPASSWORD=lol
 SALAISUUS=enkerro
+GROUP_ID=MAUMAU
 
 export DBPASSWORD
 export SALAISUUS
+export GROUP_ID

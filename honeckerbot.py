@@ -31,7 +31,7 @@ def noppa() -> int:
     return noppa
 
 def arvon_paasihteeri(update: Update, context: CallbackContext):
-    noppa = random.randint(0, 12)
+    noppa = random.randint(0, 10)
 
     if noppa == 1:
         paasihteeri = "Politbyroo hyväksyy"
@@ -267,10 +267,11 @@ dokaus_days = {} # {date: list[str]}
 
 def listaa_dokaukset() -> str:
     global dokaus_days
+    doks = dict(sorted(dokaus_days.items()))
     dokaukset = ""
-    for day in dokaus_days:
+    for day in doks:
         dokaukset = dokaukset + str(day) + " "
-        for dokaus in dokaus_days[day]:
+        for dokaus in doks[day]:
             dokaukset += dokaus
             dokaukset += " "
         dokaukset += "\n"
